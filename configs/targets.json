@@ -1,0 +1,31 @@
+{
+  "_comment": "Fill in base_url and pricing before running. API keys are read from the env var named in api_key_env and never stored here. Prices are placeholders: use the hourly rate you actually pay and the current Azure price list.",
+  "targets": [
+    {
+      "name": "mi300x_vllm",
+      "hardware": "1x AMD Instinct MI300X (AMD Developer Cloud), ROCm + vLLM",
+      "base_url": "http://MI300X_HOST:8000/v1",
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "api_key_env": "VLLM_API_KEY",
+      "pricing": { "gpu_hourly_usd": 0.0 }
+    },
+    {
+      "name": "h100_vllm",
+      "hardware": "1x NVIDIA H100 80GB, CUDA + vLLM",
+      "base_url": "http://H100_HOST:8000/v1",
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "api_key_env": "VLLM_API_KEY",
+      "pricing": { "gpu_hourly_usd": 0.0 }
+    },
+    {
+      "name": "azure_foundry",
+      "hardware": "Azure AI Foundry managed endpoint (serverless)",
+      "base_url": "https://YOUR-RESOURCE.services.ai.azure.com/models",
+      "api_version": "2024-05-01-preview",
+      "model": "Llama-3.1-8B-Instruct",
+      "api_key_env": "AZURE_AI_KEY",
+      "auth_header": "api-key",
+      "pricing": { "input_usd_per_1M": 0.0, "output_usd_per_1M": 0.0 }
+    }
+  ]
+}
