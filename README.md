@@ -37,6 +37,7 @@ scripts/serve_vllm_mi300x.sh   start vLLM on MI300X (ROCm docker image)
 scripts/serve_vllm_h100.sh     start vLLM on H100 (CUDA docker image)
 scripts/run_all.sh        sweep every target, then build the report
 scripts/mock_server.py    fake streaming server for a dry run without a GPU
+analyzer/                 earlier standalone harness: multi-turn callers, real-time pacing, $/conversation-minute (see analyzer/README.md)
 ```
 
 ## Quick start

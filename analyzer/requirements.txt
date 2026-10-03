@@ -1,0 +1,5 @@
+httpx>=0.27
+PyYAML>=6.0
+starlette>=0.37   # mock server only
+uvicorn>=0.29     # mock server only
+matplotlib>=3.8   # report charts only

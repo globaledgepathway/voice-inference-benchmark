@@ -1,0 +1,11 @@
+# Dry run against via/mock_server.py. Synthetic numbers; for testing the harness only.
+name: mock
+stt: {base_url: "http://localhost:9000/v1", model: whisper-mock}
+llm: {base_url: "http://localhost:9000/v1", model: llm-mock, max_tokens: 150}
+tts: {base_url: "http://localhost:9000/v1", model: tts-mock, voice: agent}
+load:
+  concurrency: [1, 4, 16, 64]
+  turns_per_session: 3
+  pacing: max
+cost: {mode: gpu_hourly, gpu_hourly_usd: 2.00, gpu_count: 1}
+sla: {time_to_first_audio_p95_ms: 1000}

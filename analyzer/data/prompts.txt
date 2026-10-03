@@ -1,0 +1,21 @@
+# One caller utterance per line. `python -m via.cli audio` turns these into data/audio/*.wav
+Hi, can you tell me where my order is? I placed it last Tuesday.
+I want to return a jacket that doesn't fit. How do I do that?
+What's the difference between the basic plan and the premium plan?
+My card got charged twice for the same order. Can you fix that?
+Do you ship to Canada, and how long does it take?
+I forgot my password and the reset email never arrived.
+Can I change the delivery address on an order that's already shipped?
+What time does your support team close today?
+The blender I bought stopped working after two weeks. Is it under warranty?
+Can you recommend a good laptop bag for a fifteen inch laptop?
+I'd like to cancel my subscription before the next billing date.
+Is the blue version of these headphones back in stock yet?
+How do I apply a discount code at checkout?
+My package says delivered but I don't see it anywhere.
+Can I speak to someone about a bulk order for my company?
+What's your price match policy?
+I received the wrong size. Can you send the right one before Friday?
+How do I update the phone number on my account?
+Are there any sales coming up this weekend?
+Thanks, that's all I needed. Have a good day.
