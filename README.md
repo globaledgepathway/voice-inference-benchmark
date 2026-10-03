@@ -30,6 +30,9 @@ bench/llm_bench.py        streaming benchmark client, concurrency sweep (stdlib 
 bench/report.py           builds results/REPORT.md: latency + cost comparison
 configs/targets.json      endpoints, model names, pricing (fill in)
 prompts/voice_turns.jsonl 12 realistic phone-call turns (booking, billing, sales objections…)
+bench/voice_turn_bench.py full voice loop: Whisper STT -> streaming LLM -> TTS, time to first audio
+bench/tts_server.py       minimal Kokoro-82M TTS server (one GPU worker per process)
+bench/noisy_neighbor.py   two tenants on one GPU: voice latency alone vs with a batch neighbour, chargeback
 scripts/serve_vllm_mi300x.sh   start vLLM on MI300X (ROCm docker image)
 scripts/serve_vllm_h100.sh     start vLLM on H100 (CUDA docker image)
 scripts/run_all.sh        sweep every target, then build the report
@@ -72,6 +75,31 @@ CONC="1 4 8 16 32 64" REQ=64 SLA_MS=500 ./scripts/run_all.sh
 cat results/REPORT.md
 ```
 
+## Shared GPUs: the noisy-neighbour test
+
+Platform teams rarely give one model a whole GPU. `bench/noisy_neighbor.py` measures what sharing costs a
+latency-sensitive tenant, with no scheduler to install:
+
+| Tenant | Workload | Cares about |
+|---|---|---|
+| A, voice | short voice turns at fixed concurrency | TTFT p95 under the voice SLA |
+| B, batch | long prompts (~1,500 words in, 512 out) kept in flight | throughput |
+
+Phases, same tenant-A load each time: **alone** (baseline), **shared** (both at equal priority), and
+**priority** (voice requests sent with higher priority; start vLLM with `--scheduling-policy priority`).
+For the shared phases it splits the GPU cost of the window between tenants by processed tokens: a simple
+chargeback model.
+
+```bash
+# on the GPU box, vLLM started with: --scheduling-policy priority
+python3 bench/noisy_neighbor.py --target h100_vllm --voice-conc 8 --batch-conc 32 --priority
+```
+
+What it shows: how far voice TTFT p95 moves when a batch job lands on the same GPU, whether request
+priority restores it, and what each tenant would be billed. Those are the questions queue-based
+schedulers (Kubernetes GPU operator with MIG/time-slicing, Run:ai quotas and preemption, Ray Serve
+replicas) exist to answer.
+
 ## Method notes
 
 - Same model, same prompts, same `max_tokens` (150 ≈ 20 s of speech) on every target.
@@ -86,7 +114,8 @@ Run it and the table lands in `results/REPORT.md`. *(Numbers to be added after t
 
 ## Roadmap
 
-- [ ] ASR (Whisper) and TTS stages, for full voice-turn latency: speech in → speech out
+- [x] ASR (Whisper) and TTS stages, for full voice-turn latency: speech in → speech out (`bench/voice_turn_bench.py`)
+- [x] Noisy-neighbour / multi-tenant test with chargeback (`bench/noisy_neighbor.py`)
 - [ ] Larger model (70B) where MI300X's 192 GB HBM fits on one GPU and H100 needs two
 - [ ] FP8 quantization comparison
 - [ ] Charts for TTFT vs concurrency and $/turn

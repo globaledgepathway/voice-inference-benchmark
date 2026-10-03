@@ -40,7 +40,7 @@ def pct(values, p):
     return s[lo] + (s[hi] - s[lo]) * (k - lo)
 
 
-def build_request(target, messages, max_tokens):
+def build_request(target, messages, max_tokens, extra=None):
     url = target["base_url"].rstrip("/") + "/chat/completions"
     if target.get("api_version"):
         url += f"?api-version={target['api_version']}"
@@ -59,11 +59,12 @@ def build_request(target, messages, max_tokens):
         "stream": True,
         "stream_options": {"include_usage": True},
     }
+    body.update(extra or {})  # e.g. {"priority": 0} for vLLM --scheduling-policy priority
     return urllib.request.Request(url, data=json.dumps(body).encode(), headers=headers, method="POST")
 
 
-def run_one(target, prompt, max_tokens, timeout):
-    req = build_request(target, prompt["messages"], max_tokens)
+def run_one(target, prompt, max_tokens, timeout, extra=None):
+    req = build_request(target, prompt["messages"], max_tokens, extra)
     t0 = time.perf_counter()
     first = None
     token_times = []
