@@ -1,0 +1,72 @@
+{
+  "target": {
+    "name": "mi300x_vllm",
+    "hardware": "1x AMD Instinct MI300X (AMD Developer Cloud), ROCm + vLLM",
+    "base_url": "http://localhost:8000/v1",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "api_key_env": "VLLM_API_KEY",
+    "pricing": {
+      "gpu_hourly_usd": 1.99
+    }
+  },
+  "max_tokens": 150,
+  "runs": [
+    {
+      "target": "mi300x_vllm",
+      "hardware": "1x AMD Instinct MI300X (AMD Developer Cloud), ROCm + vLLM",
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "concurrency": 16,
+      "requests": 256,
+      "success": 256,
+      "errors": 0,
+      "wall_s": 4.291,
+      "ttft_p50_ms": 21.9,
+      "ttft_p95_ms": 31.7,
+      "itl_p50_ms": 7.28,
+      "e2e_p50_s": 0.241,
+      "e2e_p95_s": 0.383,
+      "total_input_tokens": 20034,
+      "total_output_tokens": 8493,
+      "agg_output_tok_per_s": 1979.3,
+      "req_per_s": 59.662
+    },
+    {
+      "target": "mi300x_vllm",
+      "hardware": "1x AMD Instinct MI300X (AMD Developer Cloud), ROCm + vLLM",
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "concurrency": 128,
+      "requests": 256,
+      "success": 256,
+      "errors": 0,
+      "wall_s": 1.283,
+      "ttft_p50_ms": 59.1,
+      "ttft_p95_ms": 222.0,
+      "itl_p50_ms": 12.73,
+      "e2e_p50_s": 0.477,
+      "e2e_p95_s": 0.713,
+      "total_input_tokens": 20034,
+      "total_output_tokens": 8361,
+      "agg_output_tok_per_s": 6517.8,
+      "req_per_s": 199.565
+    },
+    {
+      "target": "mi300x_vllm",
+      "hardware": "1x AMD Instinct MI300X (AMD Developer Cloud), ROCm + vLLM",
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "concurrency": 256,
+      "requests": 256,
+      "success": 256,
+      "errors": 0,
+      "wall_s": 1.208,
+      "ttft_p50_ms": 191.8,
+      "ttft_p95_ms": 417.9,
+      "itl_p50_ms": 16.19,
+      "e2e_p50_s": 0.741,
+      "e2e_p95_s": 1.011,
+      "total_input_tokens": 20034,
+      "total_output_tokens": 8488,
+      "agg_output_tok_per_s": 7025.9,
+      "req_per_s": 211.902
+    }
+  ]
+}

@@ -155,10 +155,39 @@ Findings:
 18,071 total tok/s, TTFT p50 2.5 s (burst queueing; not a voice-shaped load). See
 `results/vllm_bench_serve_random_512in_128out.txt`.
 
+### Managed text-to-speech (from Azure Cloud Shell, network included), 2026-10-03
+
+`managed_tts_bench.py`, same first-sentence texts, 32 requests per level.
+
+| Provider | Callers | First audio p50 / p95 | Full sentence p50 | Errors |
+|---|---|---|---|---|
+| Azure AI Speech (Ava neural, F0) | 1 | **111 / 296 ms** | 189 ms | 0 |
+| OpenAI gpt-4o-mini-tts | 1 | **591 / 1,508 ms** | 1,387 ms | 0 |
+| OpenAI gpt-4o-mini-tts | 4 | 478 / 818 ms | 1,173 ms | 0 |
+| OpenAI gpt-4o-mini-tts | 8 | 408 / 600 ms | 1,046 ms | 0 |
+
+Azure at 4 and 8 callers hit the free tier's rate limit (HTTP 429 on 10/32 and 16/32 requests), so only the
+single-caller Azure row is a clean measurement; a paid S0 resource is needed for concurrency.
+
+**Speech in → first audio out, one caller** (STT + LLM to first sentence from the earlier API runs, plus TTS above):
+
+| Stack | STT + LLM first sentence | + TTS first audio | **≈ Caller hears audio** |
+|---|---|---|---|
+| MI300X self-hosted (Whisper + Llama-3.1-8B + Kokoro), no network | 242 ms | 221 ms | **463 ms** |
+| Azure AI Foundry gpt-4.1-mini + Azure AI Speech | 1,517 ms | 111 ms | **≈ 1.63 s** |
+| OpenAI gpt-4.1-mini + gpt-4o-mini-tts | 1,740 ms | 591 ms | **≈ 2.33 s** |
+
+Managed rows are sums of separately measured stages, and include network time; the MI300X row is one
+measured pipeline without network. Azure's TTS is faster than the single Kokoro worker (111 vs 221 ms); the
+self-hosted advantage comes from STT and the LLM.
+
+Note: Meta-Llama-3.1-8B-Instruct was retired from Azure AI Foundry on 2026-06-13, so a same-model managed
+comparison isn't possible there.
+
 ### Still to run
 - NVIDIA H100: same three models and scripts, plus `noisy_neighbor.py`
 - Network-inclusive run (client in Azure, servers reached over the internet)
-- Azure AI Foundry with Llama-3.1-8B (same-model managed comparison) and managed TTS for the full loop
+- Azure AI Speech at concurrency on a paid (S0) resource
 
 ## Roadmap
 
