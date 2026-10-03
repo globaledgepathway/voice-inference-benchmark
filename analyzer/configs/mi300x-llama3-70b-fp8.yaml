@@ -1,0 +1,16 @@
+# MI300X, 70B model in FP8 on a single GPU (192 GB HBM3). Same stack as the 8B config.
+# Pre-quantized FP8 checkpoint (~70 GB download instead of ~140 GB).
+# Start with: MODEL=RedHatAI/Meta-Llama-3.1-70B-Instruct-FP8 scripts/serve_rocm.sh
+name: mi300x-llama3.1-70b-fp8
+stt: {base_url: "http://localhost:8001/v1", model: openai/whisper-large-v3-turbo, language: en}
+llm:
+  base_url: "http://localhost:8000/v1"
+  model: RedHatAI/Meta-Llama-3.1-70B-Instruct-FP8
+  max_tokens: 150
+  system_prompt: >-
+    You are a helpful customer-support voice agent for an online store.
+    Answer in one to three short, natural spoken sentences. No lists or markdown.
+tts: {base_url: "http://localhost:8880/v1", model: kokoro, voice: af_heart}
+load: {concurrency: [1, 2, 4, 8, 16, 32, 64, 100], turns_per_session: 5, pacing: realtime}
+cost: {mode: gpu_hourly, gpu_hourly_usd: 2.59, gpu_count: 1}
+sla: {time_to_first_audio_p95_ms: 1000}

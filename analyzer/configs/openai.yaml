@@ -1,0 +1,21 @@
+# OpenAI managed APIs as the baseline. export OPENAI_API_KEY=...
+name: openai
+stt: {base_url: "https://api.openai.com/v1", api_key: "${OPENAI_API_KEY}", model: gpt-4o-mini-transcribe, language: en}
+llm:
+  base_url: "https://api.openai.com/v1"
+  api_key: "${OPENAI_API_KEY}"
+  model: gpt-4o-mini
+  max_tokens: 150
+  system_prompt: >-
+    You are a helpful customer-support voice agent for an online store.
+    Answer in one to three short, natural spoken sentences. No lists or markdown.
+tts: {base_url: "https://api.openai.com/v1", api_key: "${OPENAI_API_KEY}", model: gpt-4o-mini-tts, voice: alloy}
+load: {concurrency: [1, 2, 4, 8, 16, 32], turns_per_session: 5, pacing: realtime}
+cost:
+  mode: per_use
+  pricing:                       # fill in from https://openai.com/api/pricing
+    stt_usd_per_min: 0.0
+    llm_input_usd_per_1m_tokens: 0.0
+    llm_output_usd_per_1m_tokens: 0.0
+    tts_usd_per_1m_chars: 0.0
+sla: {time_to_first_audio_p95_ms: 1000}

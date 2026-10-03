@@ -1,0 +1,19 @@
+# NVIDIA H100 80GB, same models and settings as configs/mi300x-llama3-8b.yaml.
+# Start servers with: scripts/serve_cuda.sh
+name: h100-llama3.1-8b
+stt: {base_url: "http://localhost:8001/v1", model: openai/whisper-large-v3-turbo, language: en}
+llm:
+  base_url: "http://localhost:8000/v1"
+  model: meta-llama/Llama-3.1-8B-Instruct
+  max_tokens: 150
+  temperature: 0.7
+  system_prompt: >-
+    You are a helpful customer-support voice agent for an online store.
+    Answer in one to three short, natural spoken sentences. No lists or markdown.
+tts: {base_url: "http://localhost:8880/v1", model: kokoro, voice: af_heart}
+load: {concurrency: [1, 2, 4, 8, 16, 32, 64, 100], turns_per_session: 5, pacing: realtime}
+cost:
+  mode: gpu_hourly
+  gpu_hourly_usd: 2.49   # set to the rate you are actually billed
+  gpu_count: 1
+sla: {time_to_first_audio_p95_ms: 1000}

@@ -1,0 +1,36 @@
+# Managed APIs on Azure AI Foundry / Azure OpenAI (pay per use, no GPUs to manage).
+# Use the OpenAI v1-compatible endpoint of your resource and key auth.
+#   export AZURE_AI_ENDPOINT=https://<resource>.openai.azure.com/openai/v1
+#   export AZURE_AI_KEY=...
+# `model` is your *deployment name* for each model.
+name: azure-foundry
+stt:
+  base_url: "${AZURE_AI_ENDPOINT}"
+  api_key: "${AZURE_AI_KEY}"
+  auth_header: api-key
+  model: "${AZURE_STT_DEPLOYMENT:-whisper}"
+  language: en
+llm:
+  base_url: "${AZURE_AI_ENDPOINT}"
+  api_key: "${AZURE_AI_KEY}"
+  auth_header: api-key
+  model: "${AZURE_LLM_DEPLOYMENT:-Llama-3.3-70B-Instruct}"
+  max_tokens: 150
+  system_prompt: >-
+    You are a helpful customer-support voice agent for an online store.
+    Answer in one to three short, natural spoken sentences. No lists or markdown.
+tts:
+  base_url: "${AZURE_AI_ENDPOINT}"
+  api_key: "${AZURE_AI_KEY}"
+  auth_header: api-key
+  model: "${AZURE_TTS_DEPLOYMENT:-tts}"
+  voice: alloy
+load: {concurrency: [1, 2, 4, 8, 16, 32], turns_per_session: 5, pacing: realtime}
+cost:
+  mode: per_use
+  pricing:                       # fill in from your Azure pricing page / invoice
+    stt_usd_per_min: 0.0
+    llm_input_usd_per_1m_tokens: 0.0
+    llm_output_usd_per_1m_tokens: 0.0
+    tts_usd_per_1m_chars: 0.0
+sla: {time_to_first_audio_p95_ms: 1000}

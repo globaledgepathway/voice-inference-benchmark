@@ -21,10 +21,19 @@ import os
 
 
 def latest_summaries(results_dir):
+    """Merge every llm_bench sweep per target. Files sort by timestamp, so a later
+    re-run at the same concurrency replaces the earlier one."""
     by_target = {}
     for path in sorted(glob.glob(os.path.join(results_dir, "*_summary.json"))):
         data = json.load(open(path))
-        by_target[data["target"]["name"]] = data  # sorted by timestamp, so last wins
+        if "target" not in data:  # voice-loop / TTS summaries, not llm_bench sweeps
+            continue
+        merged = by_target.setdefault(data["target"]["name"], {"target": data["target"], "runs": {}})
+        merged["target"] = data["target"]
+        for r in data["runs"]:
+            merged["runs"][r["concurrency"]] = r
+    for d in by_target.values():
+        d["runs"] = [d["runs"][c] for c in sorted(d["runs"])]
     return by_target
 
 

@@ -1,0 +1,79 @@
+{
+  "note": "Run from Azure Cloud Shell (network included). Transcribed from run output; originals in Cloud Shell ~/vib/results/.",
+  "runs": [
+    {
+      "provider": "openai",
+      "model": "gpt-4o-mini-tts",
+      "concurrency": 1,
+      "requests": 32,
+      "errors": 0,
+      "first_audio_p50_ms": 591,
+      "first_audio_p95_ms": 1508,
+      "full_audio_p50_ms": 1387,
+      "audio_s_p50": 5.05
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-4o-mini-tts",
+      "concurrency": 4,
+      "requests": 32,
+      "errors": 0,
+      "first_audio_p50_ms": 478,
+      "first_audio_p95_ms": 818,
+      "full_audio_p50_ms": 1173,
+      "audio_s_p50": 5.03
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-4o-mini-tts",
+      "concurrency": 8,
+      "requests": 32,
+      "errors": 0,
+      "first_audio_p50_ms": 408,
+      "first_audio_p95_ms": 600,
+      "full_audio_p50_ms": 1046,
+      "audio_s_p50": 4.9
+    },
+    {
+      "provider": "azure",
+      "voice": "en-US-AvaMultilingualNeural",
+      "sku": "F0",
+      "region": "eastus",
+      "concurrency": 1,
+      "requests": 32,
+      "errors": 0,
+      "first_audio_p50_ms": 111,
+      "first_audio_p95_ms": 296,
+      "full_audio_p50_ms": 189,
+      "audio_s_p50": 4.61
+    },
+    {
+      "provider": "azure",
+      "voice": "en-US-AvaMultilingualNeural",
+      "sku": "F0",
+      "region": "eastus",
+      "concurrency": 4,
+      "requests": 32,
+      "errors": 10,
+      "error": "HTTP 429 (F0 free-tier rate limit)",
+      "first_audio_p50_ms": 76,
+      "first_audio_p95_ms": 232,
+      "full_audio_p50_ms": 159,
+      "audio_s_p50": 4.36
+    },
+    {
+      "provider": "azure",
+      "voice": "en-US-AvaMultilingualNeural",
+      "sku": "F0",
+      "region": "eastus",
+      "concurrency": 8,
+      "requests": 32,
+      "errors": 16,
+      "error": "HTTP 429 (F0 free-tier rate limit)",
+      "first_audio_p50_ms": 51,
+      "first_audio_p95_ms": 243,
+      "full_audio_p50_ms": 129,
+      "audio_s_p50": 4.36
+    }
+  ]
+}

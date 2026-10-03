@@ -1,0 +1,58 @@
+{
+  "asr_model": "openai/whisper-large-v3-turbo",
+  "llm_model": "meta-llama/Llama-3.1-8B-Instruct",
+  "runs": [
+    {
+      "concurrency": 1,
+      "turns": 64,
+      "errors": 0,
+      "wall_s": 17.82,
+      "asr_p50_ms": 111,
+      "asr_p95_ms": 198,
+      "ttft_p50_ms": 12,
+      "ttft_p95_ms": 13,
+      "first_sentence_p50_ms": 132,
+      "turn_p50_ms": 242,
+      "turn_p95_ms": 392
+    },
+    {
+      "concurrency": 8,
+      "turns": 64,
+      "errors": 0,
+      "wall_s": 5.76,
+      "asr_p50_ms": 163,
+      "asr_p95_ms": 463,
+      "ttft_p50_ms": 40,
+      "ttft_p95_ms": 55,
+      "first_sentence_p50_ms": 308,
+      "turn_p50_ms": 504,
+      "turn_p95_ms": 1452
+    },
+    {
+      "concurrency": 32,
+      "turns": 64,
+      "errors": 0,
+      "wall_s": 3.4,
+      "asr_p50_ms": 573,
+      "asr_p95_ms": 712,
+      "ttft_p50_ms": 37,
+      "ttft_p95_ms": 54,
+      "first_sentence_p50_ms": 348,
+      "turn_p50_ms": 931,
+      "turn_p95_ms": 1748
+    },
+    {
+      "concurrency": 64,
+      "turns": 128,
+      "errors": 0,
+      "wall_s": 2.92,
+      "asr_p50_ms": 862,
+      "asr_p95_ms": 1176,
+      "ttft_p50_ms": 49,
+      "ttft_p95_ms": 80,
+      "first_sentence_p50_ms": 404,
+      "turn_p50_ms": 1289,
+      "turn_p95_ms": 1751
+    }
+  ]
+}
