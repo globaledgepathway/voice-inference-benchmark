@@ -110,7 +110,54 @@ replicas) exist to answer.
 
 ## Results
 
-Run it and the table lands in `results/REPORT.md`. *(Numbers to be added after the MI300X / H100 / Azure runs.)*
+### AMD MI300X (AMD Developer Cloud, vLLM 0.27.1, ROCm 7.2), 2026-10-03
+
+One MI300X, $1.99/hr. Client ran on the same droplet, so **no network time** is included.
+Raw summaries are in `results/`.
+
+**LLM only, Llama-3.1-8B-Instruct, voice prompts, 150 max tokens** (`llm_bench.py`)
+
+| Concurrent calls | TTFT p50 | TTFT p95 | ITL p50 | Output tok/s |
+|---|---|---|---|---|
+| 1 | 14 ms | 15 ms | 4.9 ms | 195 |
+| 8 | 21 ms | 25 ms | 6.8 ms | 1,051 |
+| 32 | 27 ms | 54 ms | 8.5 ms | 2,664 |
+| 64 | 70 ms | 92 ms | 11.1 ms | 3,621 |
+| 128 | 59 ms | 222 ms | 12.7 ms | 6,518 |
+| 256 | 192 ms | 418 ms | 16.2 ms | 7,026 |
+
+Voice SLA (TTFT p95 ≤ 500 ms) still met at 256 concurrent calls: about **$0.08 per 1M output tokens**
+at full utilisation. (A first c=16 run showed a one-off 933 ms p95 spike; the re-run gave 32 ms.)
+
+**Full voice loop: Whisper-large-v3-turbo → Llama-3.1-8B → Kokoro-82M, all on the one GPU**
+(`voice_turn_bench.py`, LibriSpeech clips; memory split Whisper 20% / Llama 60%; one TTS worker)
+
+| Callers | STT p50 | LLM TTFT p50 | First sentence p50 | TTS p50 | **First audio p50 / p95** |
+|---|---|---|---|---|---|
+| 1 | 111 ms | 12 ms | 129 ms | 221 ms | **463 / 598 ms** |
+| 4 | 123 ms | 14 ms | 138 ms | 626 ms | 923 / 1,008 ms |
+| 8 | 118 ms | 13 ms | 153 ms | 1,588 ms | 1,884 / 2,160 ms |
+| 16 | 124 ms | 14 ms | 174 ms | 3,414 ms | 3,727 / 3,958 ms |
+| 32 | 401 ms | 19 ms | 207 ms | 6,653 ms | 7,066 / 7,670 ms |
+
+Findings:
+- A single caller hears the agent start speaking ~0.46 s after their audio arrives.
+- STT and LLM barely move with load; the single, serialised TTS worker is the queue. More TTS replicas
+  (or batching) is the capacity lever, not more GPU.
+- ROCm gotcha: with MIOpen on, Kokoro took ~5.5 s per sentence because MIOpen re-tunes convolution kernels
+  for every new input length (~1.5 s each). Disabling it (`torch.backends.cudnn.enabled=False`) gave a
+  steady 150–220 ms; a fully warm MIOpen cache reaches 50–75 ms.
+- Starting 8 TTS processes at once left 2 on CPU (silent fallback), which starved the box; start replicas
+  one at a time and check the device.
+
+**Synthetic throughput reference:** `vllm bench serve`, random 512 in / 128 out, 200 prompts all at once:
+18,071 total tok/s, TTFT p50 2.5 s (burst queueing; not a voice-shaped load). See
+`results/vllm_bench_serve_random_512in_128out.txt`.
+
+### Still to run
+- NVIDIA H100: same three models and scripts, plus `noisy_neighbor.py`
+- Network-inclusive run (client in Azure, servers reached over the internet)
+- Azure AI Foundry with Llama-3.1-8B (same-model managed comparison) and managed TTS for the full loop
 
 ## Roadmap
 
