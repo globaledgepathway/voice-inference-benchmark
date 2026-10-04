@@ -196,22 +196,63 @@ limit is 64 callers (3,487 tok/s, about $0.198 / 1M). Repeat runs per level woul
 vLLM request priority changed nothing: it reorders a queue, and with free KV-cache memory nothing queued.
 Isolation needs separate capacity (MIG, a separate replica, or capping the batch tenant).
 
-### MI300X vs H100 PCIe
+### NVIDIA GH200 96 GB (Lambda, vLLM 0.31.0), 2026-10-04
 
-| | MI300X | H100 PCIe |
-|---|---|---|
-| Memory / bandwidth | 192 GB HBM3, ~5.3 TB/s | 80 GB HBM2e, ~2.0 TB/s |
-| Rental | $1.99/hr | $2.49/hr |
-| TTFT p50 / ITL p50, 1 caller | 14 ms / 4.9 ms | 41 ms / 9.4 ms |
-| Highest consistent load within SLA | 256 callers, 7,026 tok/s | 64 callers, 3,487 tok/s |
-| $ / 1M output tokens at that load | **$0.079** | $0.198 |
-| Full voice loop, 1 caller, first audio | **463 ms** | 641 ms |
-| `vllm bench serve` burst, total tok/s | 18,071 | 18,591 |
+One GH200 (H100-class GPU, 96 GB HBM3, ~4 TB/s, plus a 72-core Grace ARM CPU) at $1.99/hr: the
+NVIDIA option priced like the MI300X. Same scripts and models; client on the same machine (no network).
+The 64/128/256-caller levels ran three times each; `report.py` uses the median run.
 
-Decode (token generation) is memory-bandwidth bound, which is where the MI300X leads; the prompt-heavy
-burst is compute bound and comes out even. An H100 SXM run is needed for a flagship-to-flagship comparison.
-The MI300X side cost engineering time (MIOpen re-tuning, missing audio library, CPU fallback); the CUDA side
-needed only one missing Python package.
+**LLM only** (`llm_bench.py`)
+
+| Concurrent calls | TTFT p50 | TTFT p95 | ITL p50 | Output tok/s |
+|---|---|---|---|---|
+| 1 | 17 ms | 18 ms | 5.4 ms | 175 |
+| 8 | 18 ms | 26 ms | 5.6 ms | 1,289 |
+| 32 | 32 ms | 73 ms | 6.7 ms | 3,932 |
+| 64 (median of 3) | 57 ms | 95 ms | 7.5 ms | 6,178 |
+| 128 (median of 3) | 175 ms | 241 ms | 10.9 ms | 7,140 |
+| 256 (all 3 runs) | 321–344 ms | **748–809 ms (misses SLA)** | 11.9 ms | ~7,450 |
+
+**Full voice loop** (`voice_turn_bench.py`)
+
+| Callers | STT p50 | LLM TTFT p50 | TTS p50 | **First audio p50 / p95** |
+|---|---|---|---|---|
+| 1 | 71 ms | 14 ms | 107 ms | **331 / 412 ms** |
+| 4 | 149 ms | 24 ms | 209 ms | 589 / 777 ms |
+| 8 | 160 ms | 24 ms | 726 ms | 1,158 / 1,345 ms |
+| 16 | 187 ms | 26 ms | 1,814 ms | 2,207 / 2,494 ms |
+| 32 | 365 ms | 30 ms | 3,365 ms | 3,847 / 4,829 ms |
+
+**Shared GPU** (`noisy_neighbor.py`): voice TTFT p95 26 ms alone, 40 ms with the batch neighbour (1.6×),
+33 ms with voice at higher priority. Batch tenant 5,034 tok/s. Here priority helped a little.
+
+**Burst** (`vllm bench serve`, 200 prompts at once, 512 in / 128 out): 30,033 total tok/s.
+
+### Three GPUs, one model (Llama-3.1-8B-Instruct)
+
+| | AMD MI300X | NVIDIA GH200 96 GB | NVIDIA H100 PCIe |
+|---|---|---|---|
+| Memory / bandwidth | 192 GB HBM3, ~5.3 TB/s | 96 GB HBM3, ~4 TB/s | 80 GB HBM2e, ~2.0 TB/s |
+| CPU | x86 | Grace (ARM) | x86 |
+| Rental | $1.99/hr | $1.99/hr | $2.49/hr |
+| vLLM | 0.27.1 (ROCm 7.2) | 0.31.0 (CUDA) | 0.30.0 (CUDA) |
+| TTFT p50 / ITL p50, 1 caller | **14 ms** / **4.9 ms** | 17 ms / 5.4 ms | 41 ms / 9.4 ms |
+| Highest consistent load within SLA | **256 callers** | 128 callers | 64 callers |
+| Output tok/s at that load | 7,026 | **7,140** | 3,487 |
+| $ / 1M output tokens at that load | $0.079 | **$0.077** | $0.198 |
+| Full voice loop, 1 caller, first audio | 463 ms | **331 ms** | 641 ms |
+| Burst (512 in / 128 out), total tok/s | 18,071 | **30,033** | 18,591 |
+| Software friction hit | MIOpen re-tuning, missing torchcodec, TTS CPU fallback | none (ARM image worked) | one missing package |
+
+What it says:
+- **Against the H100 PCIe**, the MI300X wins clearly: about 2× the throughput within the SLA at about
+  40% of the cost per token. That card is bandwidth-limited and dearer.
+- **Against the price-matched GH200** it's close: cost per token is a tie ($0.079 vs $0.077), the GH200
+  is faster end to end (331 vs 463 ms to first audio; faster STT and TTS) and much stronger on
+  prompt-heavy bursts (30k vs 18k tok/s), while the MI300X holds twice as many concurrent calls
+  inside the SLA (256 vs 128) thanks to 192 GB of memory.
+- The MI300X numbers came with more engineering time on ROCm. The vLLM versions differ (0.27.1 vs
+  0.30/0.31); some of the GH200's lead may be newer software rather than hardware.
 
 ### Managed text-to-speech (from Azure Cloud Shell, network included), 2026-10-03
 
@@ -243,7 +284,8 @@ Note: Meta-Llama-3.1-8B-Instruct was retired from Azure AI Foundry on 2026-06-13
 comparison isn't possible there.
 
 ### Still to run
-- NVIDIA H100 SXM (flagship-to-flagship); repeat runs per concurrency level
+- NVIDIA H100 SXM (flagship-to-flagship)
+- MI300X re-run on the same vLLM version (0.31) with repeats at high load
 - Network-inclusive run (client in Azure, servers reached over the internet)
 - Azure AI Speech at concurrency on a paid (S0) resource
 

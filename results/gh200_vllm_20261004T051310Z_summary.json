@@ -1,0 +1,72 @@
+{
+  "target": {
+    "name": "gh200_vllm",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "api_key_env": "VLLM_API_KEY",
+    "pricing": {
+      "gpu_hourly_usd": 1.99
+    },
+    "hardware": "1x NVIDIA GH200 480GB, CUDA + vLLM",
+    "base_url": "http://localhost:8000/v1"
+  },
+  "max_tokens": 150,
+  "runs": [
+    {
+      "target": "gh200_vllm",
+      "hardware": "1x NVIDIA GH200 480GB, CUDA + vLLM",
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "concurrency": 64,
+      "requests": 256,
+      "success": 256,
+      "errors": 0,
+      "wall_s": 1.431,
+      "ttft_p50_ms": 52.2,
+      "ttft_p95_ms": 85.7,
+      "itl_p50_ms": 7.56,
+      "e2e_p50_s": 0.286,
+      "e2e_p95_s": 0.426,
+      "total_input_tokens": 20034,
+      "total_output_tokens": 8620,
+      "agg_output_tok_per_s": 6021.7,
+      "req_per_s": 178.836
+    },
+    {
+      "target": "gh200_vllm",
+      "hardware": "1x NVIDIA GH200 480GB, CUDA + vLLM",
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "concurrency": 128,
+      "requests": 256,
+      "success": 256,
+      "errors": 0,
+      "wall_s": 1.255,
+      "ttft_p50_ms": 170.4,
+      "ttft_p95_ms": 234.0,
+      "itl_p50_ms": 11.31,
+      "e2e_p50_s": 0.455,
+      "e2e_p95_s": 0.607,
+      "total_input_tokens": 20034,
+      "total_output_tokens": 8639,
+      "agg_output_tok_per_s": 6882.8,
+      "req_per_s": 203.957
+    },
+    {
+      "target": "gh200_vllm",
+      "hardware": "1x NVIDIA GH200 480GB, CUDA + vLLM",
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "concurrency": 256,
+      "requests": 256,
+      "success": 256,
+      "errors": 0,
+      "wall_s": 1.155,
+      "ttft_p50_ms": 343.9,
+      "ttft_p95_ms": 801.7,
+      "itl_p50_ms": 12.06,
+      "e2e_p50_s": 0.699,
+      "e2e_p95_s": 1.029,
+      "total_input_tokens": 20034,
+      "total_output_tokens": 8601,
+      "agg_output_tok_per_s": 7446.7,
+      "req_per_s": 221.645
+    }
+  ]
+}
