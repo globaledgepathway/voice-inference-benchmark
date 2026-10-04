@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/vib/bench/voice_turn_bench.py", line 11, in <module>
+    import pyarrow.parquet as pq
+ModuleNotFoundError: No module named 'pyarrow'

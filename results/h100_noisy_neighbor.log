@@ -1,0 +1,13 @@
+phase: alone ...
+phase: shared ...
+phase: priority ...
+
+## Noisy neighbour: h100_vllm  (voice conc 8, batch conc 32 x ~1500 words in / 512 out)
+
+| phase | voice TTFT p50 ms | voice TTFT p95 ms | vs alone | ITL p50 ms | E2E p95 ms | SLA 500 ms | batch out tok/s | voice $ / batch $ |
+|---|---|---|---|---|---|---|---|---|
+| alone | 52.9 | 89.2 | 1.0x | 10.3 | 568.0 | pass | - | - |
+| shared | 91.0 | 130.6 | 1.5x | 13.2 | 748.7 | pass | 2824.1 | 0.00019 / 0.00441 |
+| priority | 89.9 | 132.0 | 1.5x | 13.1 | 739.8 | pass | 2826.3 | 0.00018 / 0.00430 |
+
+saved results/noisy_neighbor_h100_vllm_20261004T004344Z.json

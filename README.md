@@ -155,6 +155,64 @@ Findings:
 18,071 total tok/s, TTFT p50 2.5 s (burst queueing; not a voice-shaped load). See
 `results/vllm_bench_serve_random_512in_128out.txt`.
 
+### NVIDIA H100 PCIe (Lambda, vLLM 0.30.0), 2026-10-04
+
+One H100 PCIe 80GB at $2.49/hr, same scripts and models; client on the same machine (no network).
+Note: this is the PCIe card (HBM2e, ~2.0 TB/s, 350 W), not the H100 SXM (HBM3, ~3.35 TB/s, 700 W).
+
+**LLM only, Llama-3.1-8B-Instruct** (`llm_bench.py`)
+
+| Concurrent calls | TTFT p50 | TTFT p95 | ITL p50 | Output tok/s |
+|---|---|---|---|---|
+| 1 | 41 ms | 43 ms | 9.4 ms | 96 |
+| 8 | 51 ms | 72 ms | 10.3 ms | 671 |
+| 32 | 77 ms | 200 ms | 10.6 ms | 2,181 |
+| 64 | 142 ms | 266 ms | 11.2 ms | 3,487 |
+| 128 | 252 ms | **548 ms (misses SLA)** | 14.0 ms | 4,201 |
+| 256 | 238 ms | 438 ms | 11.9 ms | 4,449 |
+
+128 callers missed the 500 ms p95 target and 256 passed: run-to-run noise from a single run per level.
+`report.py` takes the highest passing level (256, $0.155 / 1M output tokens); the H100's consistent
+limit is 64 callers (3,487 tok/s, about $0.198 / 1M). Repeat runs per level would settle it.
+
+**Full voice loop, Whisper → Llama → Kokoro on one GPU** (`voice_turn_bench.py`)
+
+| Callers | STT p50 | LLM TTFT p50 | TTS p50 | **First audio p50 / p95** |
+|---|---|---|---|---|
+| 1 | 172 ms | 43 ms | 220 ms | **641 / 844 ms** |
+| 4 | 160 ms | 50 ms | 421 ms | 995 / 1,288 ms |
+| 8 | 160 ms | 51 ms | 1,408 ms | 1,965 / 2,122 ms |
+| 16 | 178 ms | 51 ms | 3,313 ms | 3,901 / 4,218 ms |
+| 32 | 362 ms | 59 ms | 7,003 ms | 7,625 / 8,625 ms |
+
+**Shared GPU: voice tenant with a batch neighbour** (`noisy_neighbor.py`, 8 voice callers + 32 batch jobs)
+
+| Phase | Voice TTFT p50 / p95 | vs alone | Batch out tok/s | Cost split voice / batch |
+|---|---|---|---|---|
+| Voice alone | 53 / 89 ms | 1.0× | – | – |
+| With batch neighbour | 91 / 131 ms | 1.5× | 2,824 | $0.00019 / $0.00441 |
+| Neighbour, voice at higher priority | 90 / 132 ms | 1.5× | 2,826 | $0.00018 / $0.00430 |
+
+vLLM request priority changed nothing: it reorders a queue, and with free KV-cache memory nothing queued.
+Isolation needs separate capacity (MIG, a separate replica, or capping the batch tenant).
+
+### MI300X vs H100 PCIe
+
+| | MI300X | H100 PCIe |
+|---|---|---|
+| Memory / bandwidth | 192 GB HBM3, ~5.3 TB/s | 80 GB HBM2e, ~2.0 TB/s |
+| Rental | $1.99/hr | $2.49/hr |
+| TTFT p50 / ITL p50, 1 caller | 14 ms / 4.9 ms | 41 ms / 9.4 ms |
+| Highest consistent load within SLA | 256 callers, 7,026 tok/s | 64 callers, 3,487 tok/s |
+| $ / 1M output tokens at that load | **$0.079** | $0.198 |
+| Full voice loop, 1 caller, first audio | **463 ms** | 641 ms |
+| `vllm bench serve` burst, total tok/s | 18,071 | 18,591 |
+
+Decode (token generation) is memory-bandwidth bound, which is where the MI300X leads; the prompt-heavy
+burst is compute bound and comes out even. An H100 SXM run is needed for a flagship-to-flagship comparison.
+The MI300X side cost engineering time (MIOpen re-tuning, missing audio library, CPU fallback); the CUDA side
+needed only one missing Python package.
+
 ### Managed text-to-speech (from Azure Cloud Shell, network included), 2026-10-03
 
 `managed_tts_bench.py`, same first-sentence texts, 32 requests per level.
@@ -185,7 +243,7 @@ Note: Meta-Llama-3.1-8B-Instruct was retired from Azure AI Foundry on 2026-06-13
 comparison isn't possible there.
 
 ### Still to run
-- NVIDIA H100: same three models and scripts, plus `noisy_neighbor.py`
+- NVIDIA H100 SXM (flagship-to-flagship); repeat runs per concurrency level
 - Network-inclusive run (client in Azure, servers reached over the internet)
 - Azure AI Speech at concurrency on a paid (S0) resource
 
