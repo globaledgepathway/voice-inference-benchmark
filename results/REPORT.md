@@ -4,10 +4,24 @@ Voice SLA: TTFT p95 ≤ 500 ms. Throughput and self-hosted cost are taken at the
 
 | target | hardware | model | ttft_p50_ms@c=low | e2e_p50_s@c=low | sla_concurrency | tok_per_s@sla | usd_per_1M_out | usd_per_turn |
 |---|---|---|---|---|---|---|---|---|
+| gh200_vllm | 1x NVIDIA GH200 96GB HBM3 + Grace ARM CPU (Lambda), CUDA + vLLM 0.31.0 | meta-llama/Llama-3.1-8B-Instruct | 16.9 | 0.179 | 128 | 7140.2 | 0.077 | 0.000003 |
 | h100_vllm | 1x NVIDIA H100 PCIe 80GB (Lambda), CUDA + vLLM 0.30.0 | meta-llama/Llama-3.1-8B-Instruct | 41.0 | 0.324 | 64 | 3486.7 | 0.198 | 0.000007 |
 | mi300x_vllm | 1x AMD Instinct MI300X (AMD Developer Cloud), ROCm + vLLM | meta-llama/Llama-3.1-8B-Instruct | 14.4 | 0.169 | 256 | 7025.9 | 0.079 | 0.000003 |
 
 ## Per-concurrency detail
+
+### gh200_vllm
+
+| concurrency | TTFT p50 ms | TTFT p95 ms | ITL p50 ms | E2E p95 s | out tok/s | errors |
+|---|---|---|---|---|---|---|
+| 1 | 16.9 | 17.5 | 5.39 | 0.271 | 174.6 | 0 |
+| 4 | 17.3 | 23.0 | 5.48 | 0.292 | 674.4 | 0 |
+| 8 | 18.1 | 26.3 | 5.58 | 0.298 | 1289.1 | 0 |
+| 16 | 20.3 | 39.0 | 5.91 | 0.317 | 2388.4 | 0 |
+| 32 | 32.1 | 72.7 | 6.67 | 0.373 | 3932.2 | 0 |
+| 64 | 65.5 | 94.5 | 7.25 | 0.42 | 6195.1 | 0 |
+| 128 | 175.3 | 241.4 | 10.87 | 0.608 | 7140.2 | 0 |
+| 256 | 343.9 | 801.7 | 12.06 | 1.029 | 7446.7 | 0 |
 
 ### h100_vllm
 

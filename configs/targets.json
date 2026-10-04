@@ -18,6 +18,14 @@
       "pricing": { "gpu_hourly_usd": 2.49 }
     },
     {
+      "name": "gh200_vllm",
+      "hardware": "1x NVIDIA GH200 96GB HBM3 + Grace ARM CPU (Lambda), CUDA + vLLM 0.31.0",
+      "base_url": "http://GH200_HOST:8000/v1",
+      "model": "meta-llama/Llama-3.1-8B-Instruct",
+      "api_key_env": "VLLM_API_KEY",
+      "pricing": { "gpu_hourly_usd": 1.99 }
+    },
+    {
       "name": "azure_foundry",
       "hardware": "Azure AI Foundry managed endpoint (serverless)",
       "base_url": "https://YOUR-RESOURCE.services.ai.azure.com/models",

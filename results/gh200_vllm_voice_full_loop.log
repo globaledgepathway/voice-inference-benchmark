@@ -1,0 +1,8 @@
+73 clips loaded; warming up
+conc ok/err | ASR p50/p95 | LLM TTFT p50 | 1st sentence p50 | TTS p50/p95 | FIRST AUDIO p50/p95 (ms)
+   1 64/0 | 71/114 | 14 | 153 | 107/113 | 331/412  (spoken 7.1s)
+   4 64/0 | 149/290 | 24 | 230 | 209/330 | 589/777  (spoken 6.55s)
+   8 64/0 | 160/336 | 24 | 235 | 726/846 | 1158/1345  (spoken 6.6s)
+  16 64/0 | 187/338 | 26 | 220 | 1814/2048 | 2207/2494  (spoken 6.74s)
+  32 64/0 | 365/488 | 30 | 251 | 3365/4339 | 3847/4829  (spoken 7.06s)
+saved results/gh200_vllm_voice_full_loop_summary.json
