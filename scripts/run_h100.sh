@@ -65,7 +65,7 @@ grep -E 'Successful|Output token throughput|Total token throughput|Mean TTFT|Med
 
 echo "== Phase 2: Whisper + Llama + Kokoro on one GPU"
 stop_all
-X "pip install -q kokoro soundfile >/tmp/pip.log 2>&1; (apt-get update -qq && apt-get install -y -qq espeak-ng) >/dev/null 2>&1; true"
+X "pip install -q pyarrow kokoro soundfile >/tmp/pip.log 2>&1; (apt-get update -qq && apt-get install -y -qq espeak-ng) >/dev/null 2>&1; true"
 X "nohup vllm serve $ASR --port 8001 --gpu-memory-utilization 0.2 > /tmp/srv_8001.log 2>&1 &"
 wait_up 8001 "[w]hisper-large" || exit 1
 X "nohup vllm serve $MODEL --port 8000 --gpu-memory-utilization 0.6 --max-model-len 8192 > /tmp/srv_8000.log 2>&1 &"
