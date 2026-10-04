@@ -209,7 +209,7 @@ The 64/128/256-caller levels ran three times each; `report.py` uses the median r
 | 1 | 17 ms | 18 ms | 5.4 ms | 175 |
 | 8 | 18 ms | 26 ms | 5.6 ms | 1,289 |
 | 32 | 32 ms | 73 ms | 6.7 ms | 3,932 |
-| 64 (median of 3) | 57 ms | 95 ms | 7.5 ms | 6,178 |
+| 64 (median of 3) | 66 ms | 95 ms | 7.3 ms | 6,195 |
 | 128 (median of 3) | 175 ms | 241 ms | 10.9 ms | 7,140 |
 | 256 (all 3 runs) | 321–344 ms | **748–809 ms (misses SLA)** | 11.9 ms | ~7,450 |
 
