@@ -68,6 +68,9 @@ def main():
 
     cfg = json.load(open(args.config))
     pricing = {t["name"]: t.get("pricing", {}) for t in cfg["targets"]}
+    # hardware text comes from the current config when it has one; summary files keep what the
+    # config said at run time, which may predate a correction (e.g. "H100 80GB" -> "H100 PCIe 80GB")
+    hardware = {t["name"]: t.get("hardware") for t in cfg["targets"]}
     data = latest_summaries(args.results)
     if not data:
         raise SystemExit(f"no *_summary.json files in {args.results}")
@@ -80,7 +83,7 @@ def main():
         low = min(runs, key=lambda r: r["concurrency"])
         row = {
             "target": name,
-            "hardware": d["target"].get("hardware", ""),
+            "hardware": hardware.get(name) or d["target"].get("hardware", ""),
             "model": d["target"]["model"],
             "ttft_p50_ms@c=low": low["ttft_p50_ms"],
             "e2e_p50_s@c=low": low["e2e_p50_s"],

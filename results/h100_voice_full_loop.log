@@ -1,4 +1,12 @@
-Traceback (most recent call last):
-  File "/vib/bench/voice_turn_bench.py", line 11, in <module>
-    import pyarrow.parquet as pq
-ModuleNotFoundError: No module named 'pyarrow'
+# H100 PCIe full voice loop (voice_turn_bench.py), 2026-10-04.
+# The first attempt inside run_h100.sh failed with "ModuleNotFoundError: No module named 'pyarrow'"
+# (the vllm/vllm-openai image lacks it). The run below is the re-run after installing pyarrow,
+# with Whisper, Llama-3.1-8B and Kokoro co-hosted on the GPU; summary in h100_voice_full_loop_summary.json.
+73 clips loaded; warming up
+conc ok/err | ASR p50/p95 | LLM TTFT p50 | 1st sentence p50 | TTS p50/p95 | FIRST AUDIO p50/p95 (ms)
+   1 64/0 | 172/256 | 43 | 262 | 220/228 | 641/844  (spoken 6.97s)
+   4 64/0 | 160/323 | 50 | 378 | 421/653 | 995/1288  (spoken 6.99s)
+   8 64/0 | 160/403 | 51 | 342 | 1408/1561 | 1965/2122  (spoken 6.03s)
+  16 64/0 | 178/617 | 51 | 368 | 3313/3594 | 3901/4218  (spoken 6.61s)
+  32 64/0 | 362/1155 | 59 | 388 | 7003/7671 | 7625/8625  (spoken 6.66s)
+saved results/h100_voice_full_loop_summary.json
