@@ -21,8 +21,7 @@ import os
 
 
 def latest_summaries(results_dir):
-    """Merge every llm_bench sweep per target. Files sort by timestamp, so a later
-    re-run at the same concurrency replaces the earlier one."""
+    """Merge every llm_bench sweep per target (files sort by timestamp)."""
     by_target = {}
     for path in sorted(glob.glob(os.path.join(results_dir, "*_summary.json"))):
         data = json.load(open(path))
@@ -31,17 +30,32 @@ def latest_summaries(results_dir):
         merged = by_target.setdefault(data["target"]["name"], {"target": data["target"], "runs": {}})
         merged["target"] = data["target"]
         for r in data["runs"]:
-            merged["runs"][r["concurrency"]] = r
+            merged["runs"].setdefault(r["concurrency"], []).append(r)
     for d in by_target.values():
-        d["runs"] = [d["runs"][c] for c in sorted(d["runs"])]
+        d["runs"] = [pick(d["runs"][c]) for c in sorted(d["runs"])]
     return by_target
 
 
+def pick(runs):
+    """One run per concurrency level: with 3+ repeats, the run with the median TTFT p95
+    (so one noisy run can't decide the SLA); with fewer, the latest run."""
+    if len(runs) >= 3:
+        ok = sorted(runs, key=lambda r: (r["ttft_p95_ms"] is None, r["ttft_p95_ms"] or 0))
+        best = dict(ok[len(ok) // 2])
+        best["repeats"] = len(runs)
+        return best
+    return runs[-1]
+
+
 def pick_run(runs, sla_ms):
-    ok = [r for r in runs if r["ttft_p95_ms"] is not None and r["ttft_p95_ms"] <= sla_ms and r["errors"] == 0]
-    if not ok:
-        return None
-    return max(ok, key=lambda r: r["agg_output_tok_per_s"] or 0)
+    """Highest concurrency where this level and every lower one meets the SLA, so a lucky
+    pass above a failing level can't set the capacity figure."""
+    best = None
+    for r in sorted(runs, key=lambda r: r["concurrency"]):
+        if r["ttft_p95_ms"] is None or r["ttft_p95_ms"] > sla_ms or r["errors"]:
+            break
+        best = r
+    return best
 
 
 def main():
@@ -94,7 +108,7 @@ def main():
         "# Voice inference benchmark: results",
         "",
         f"Voice SLA: TTFT p95 ≤ {args.ttft_sla_ms:.0f} ms. Throughput and self-hosted cost are taken "
-        "at the highest concurrency that meets it.",
+        "at the highest concurrency where it and every lower level meet it.",
         "",
         "| " + " | ".join(cols) + " |",
         "|" + "---|" * len(cols),

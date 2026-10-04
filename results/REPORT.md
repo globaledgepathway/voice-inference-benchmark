@@ -1,10 +1,10 @@
 # Voice inference benchmark: results
 
-Voice SLA: TTFT p95 ≤ 500 ms. Throughput and self-hosted cost are taken at the highest concurrency that meets it.
+Voice SLA: TTFT p95 ≤ 500 ms. Throughput and self-hosted cost are taken at the highest concurrency where it and every lower level meet it.
 
 | target | hardware | model | ttft_p50_ms@c=low | e2e_p50_s@c=low | sla_concurrency | tok_per_s@sla | usd_per_1M_out | usd_per_turn |
 |---|---|---|---|---|---|---|---|---|
-| h100_vllm | 1x NVIDIA H100 80GB, CUDA + vLLM | meta-llama/Llama-3.1-8B-Instruct | 41.0 | 0.324 | 256 | 4449.0 | 0.155 | 0.000005 |
+| h100_vllm | 1x NVIDIA H100 80GB, CUDA + vLLM | meta-llama/Llama-3.1-8B-Instruct | 41.0 | 0.324 | 64 | 3486.7 | 0.198 | 0.000007 |
 | mi300x_vllm | 1x AMD Instinct MI300X (AMD Developer Cloud), ROCm + vLLM | meta-llama/Llama-3.1-8B-Instruct | 14.4 | 0.169 | 256 | 7025.9 | 0.079 | 0.000003 |
 
 ## Per-concurrency detail
