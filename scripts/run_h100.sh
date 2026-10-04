@@ -27,7 +27,7 @@ code=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $HF_TOKE
 [ "$code" = 200 ] || { echo "HF token check failed (HTTP $code): 401 = bad token, 403 = accept the Llama 3.1 license"; exit 1; }
 
 GPU=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -1)
-case "$GPU" in *PCIe*) DEF=h100_pcie_vllm ;; *H100*) DEF=h100_sxm_vllm ;; *) DEF=nvidia_vllm ;; esac
+case "$GPU" in *GH200*) DEF=gh200_vllm ;; *PCIe*) DEF=h100_pcie_vllm ;; *H100*) DEF=h100_sxm_vllm ;; *) DEF=nvidia_vllm ;; esac
 T="${TARGET:-$DEF}"
 echo "GPU: $GPU  ->  target $T  at \$$PRICE/hr"
 [ "$PRICE" = 0 ] && echo "WARNING: H100_PRICE not set; cost per token will be 0"
